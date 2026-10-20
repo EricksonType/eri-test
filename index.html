@@ -187,11 +187,8 @@
   var backBtn = document.getElementById('back');
 
   function answer(v) {
+    // только отмечаем выбор; дальше человек сам нажимает «Дальше»
     st.a[st.qi + 1] = v; haptic(); save(); render();
-    setTimeout(function () {
-      if (st.qi < 29) st.qi++; else st.screen = 'profile';
-      save(); render(); window.scrollTo(0, 0);
-    }, 200);
   }
 
   function clarifyValid() {
