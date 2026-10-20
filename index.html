@@ -83,7 +83,9 @@
 (function () {
   'use strict';
   var tg = window.Telegram && window.Telegram.WebApp;
-  var inTelegram = !!(tg && tg.initData);
+  // при запуске кнопкой в чате Telegram не передаёт initData, поэтому проверяем платформу
+  var inTelegram = !!(tg && ((tg.initData && tg.initData.length) || (tg.platform && tg.platform !== 'unknown')));
+  var canCloud = !!(tg && tg.initData && tg.CloudStorage);
   if (tg) {
     try { tg.ready(); tg.expand(); tg.setHeaderColor('#FFFFFF'); tg.setBackgroundColor('#FFFFFF'); } catch (e) {}
   }
@@ -144,11 +146,11 @@
 
   function save() {
     var data = JSON.stringify({ screen: st.screen === 'sent' ? 'welcome' : st.screen, qi: st.qi, ci: st.ci, a: st.a, c: st.c, d: st.d });
-    try { if (tg && tg.CloudStorage && inTelegram) tg.CloudStorage.setItem(KEY, data); } catch (e) {}
+    try { if (canCloud) tg.CloudStorage.setItem(KEY, data); } catch (e) {}
     try { localStorage.setItem(KEY, data); } catch (e) {}
   }
   function clearSaved() {
-    try { if (tg && tg.CloudStorage && inTelegram) tg.CloudStorage.removeItem(KEY); } catch (e) {}
+    try { if (canCloud) tg.CloudStorage.removeItem(KEY); } catch (e) {}
     try { localStorage.removeItem(KEY); } catch (e) {}
   }
   function restore(cb) {
@@ -158,7 +160,7 @@
     }
     var done = false;
     try {
-      if (tg && tg.CloudStorage && inTelegram) {
+      if (canCloud) {
         tg.CloudStorage.getItem(KEY, function (err, val) { if (done) return; done = true; if (!err && val) apply(val); else { var l = null; try { l = localStorage.getItem(KEY); } catch (e) {} if (l) apply(l); else cb(); } });
         setTimeout(function () { if (!done) { done = true; cb(); } }, 1500);
         return;
