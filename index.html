@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>eri · профориентир</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1E3A5F; --blue: #1F6FB5; --blue-soft: #E8F1FA; --ink: #0F1419; --muted: #6B7280;
+    --line: #E1E6ED; --card: #F4F6F9; --ok: #1F7A44; --ok-soft: #EAF6EE;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: #FFFFFF; color: var(--ink); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+  main { flex: 1; padding: 20px 20px 120px; max-width: 560px; width: 100%; margin: 0 auto; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 700; }
+  p { margin: 0; }
+  .lead { font-size: 16px; line-height: 1.5; color: #4B5563; }
+  .small { font-size: 13px; line-height: 1.45; color: var(--muted); }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .eyebrow { font-size: 13px; font-weight: 600; color: var(--blue); letter-spacing: .04em; text-transform: uppercase; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .card { background: var(--card); border-radius: 16px; padding: 6px 16px; }
+  .step { display: flex; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .step:last-child { border-bottom: 0; }
+  .step .n { width: 32px; height: 32px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--blue); font-size: 14px; flex-shrink: 0; }
+  .step b { display: block; font-size: 15px; font-weight: 600; }
+  .step span { font-size: 13px; color: var(--muted); }
+  .progress { display: flex; flex-direction: column; gap: 8px; }
+  .progress .row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-weight: 500; }
+  .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .bar > div { height: 100%; background: var(--blue); border-radius: 3px; transition: width .25s; }
+  .q { font-size: 21px; line-height: 1.35; font-weight: 600; min-height: 84px; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px; padding: 8px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 16px; text-align: left; color: var(--ink); cursor: pointer; }
+  .opt .k { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; background: #F1F4F8; color: var(--blue); }
+  .opt.sel { border-color: var(--blue); background: var(--blue-soft); font-weight: 600; }
+  .opt.sel .k { background: var(--blue); color: #fff; }
+  .opt.big { align-items: flex-start; padding: 18px 16px; line-height: 1.45; }
+  .opt.big .k { width: 32px; height: 32px; }
+  .bars { display: flex; flex-direction: column; gap: 14px; background: var(--card); border-radius: 16px; padding: 18px 16px; }
+  .brow .t { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+  .brow .t b { font-weight: 700; }
+  .brow .track { height: 10px; border-radius: 5px; background: #fff; overflow: hidden; }
+  .brow .fill { height: 100%; border-radius: 5px; }
+  .note { display: flex; gap: 10px; align-items: center; border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .note.ok { background: var(--ok-soft); color: #14532D; }
+  .note.warn { background: #FFF4E5; color: #7A4B00; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1.5px solid #D5DCE6; background: #fff; font: inherit; font-size: 15px; color: var(--ink); cursor: pointer; }
+  .chip.sel { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+  label.l { font-size: 13px; color: var(--muted); font-weight: 500; display: block; margin-bottom: 6px; }
+  textarea, input[type=text] { width: 100%; border: 1.5px solid #D5DCE6; border-radius: 14px; padding: 14px; font: inherit; font-size: 16px; line-height: 1.45; color: var(--ink); background: #fff; }
+  textarea { min-height: 120px; resize: none; }
+  textarea:focus, input:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
+  .counter { text-align: right; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .choice { display: flex; gap: 14px; align-items: center; text-align: left; border: 1.5px solid #D5DCE6; background: #fff; border-radius: 16px; padding: 16px; font: inherit; color: inherit; cursor: pointer; width: 100%; }
+  .choice.sel { border-color: var(--blue); background: var(--blue-soft); }
+  .choice .ic { width: 44px; height: 44px; border-radius: 12px; background: var(--blue-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .choice b { display: block; font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .choice span { font-size: 13px; color: var(--muted); }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid #F0F2F5; }
+  footer .inner { max-width: 560px; margin: 0 auto; display: flex; gap: 10px; }
+  .btn { flex: 1; height: 52px; border: 0; border-radius: 14px; background: var(--blue); color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+  .btn:disabled { background: #B9CCE0; cursor: default; }
+  .btn.ghost { flex: 0 0 auto; padding: 0 18px; background: #F1F4F8; color: var(--blue); }
+  .link { border: 0; background: none; color: var(--blue); font: inherit; font-size: 13px; font-weight: 500; padding: 0; cursor: pointer; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<footer id="footer"><div class="inner">
+  <button class="btn ghost hidden" id="back" type="button">Назад</button>
+  <button class="btn" id="main" type="button">Начать тест</button>
+</div></footer>
+
+<script>
+(function () {
+  'use strict';
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var inTelegram = !!(tg && tg.initData);
+  if (tg) {
+    try { tg.ready(); tg.expand(); tg.setHeaderColor('#FFFFFF'); tg.setBackgroundColor('#FFFFFF'); } catch (e) {}
+  }
+
+  var Q = [
+    ['L', 'Мне по душе практическая работа с предметами: собрать, починить, настроить.'],
+    ['L', 'Мне нравится объяснять другим то, в чём я разбираюсь.'],
+    ['L', 'Когда сталкиваюсь с непонятным явлением, мне хочется выяснить, почему оно происходит.'],
+    ['L', 'Мне нравится наводить порядок в информации: таблицы, списки, системы хранения.'],
+    ['F', 'Наладить сложное устройство, которое никак не удавалось починить.', 'Помочь человеку разобраться в ситуации, которая его беспокоила.'],
+    ['L', 'Мне нравится придумывать новое: идеи, образы, тексты, оформление.'],
+    ['L', 'Мне нравится отвечать за результат общего дела.'],
+    ['L', 'Мне интересно разбираться, как устроены механизмы, приборы или инструменты.'],
+    ['L', 'Мне приятно помогать людям решать их проблемы, даже если это требует терпения.'],
+    ['F', 'По данным выяснить, почему проект не принёс результата.', 'Убедить команду взяться за новый проект и повести её за собой.'],
+    ['L', 'Мне подходит работа, где важны точность и внимание к деталям.'],
+    ['L', 'Мне важно выражать себя через творчество, в любой форме.'],
+    ['L', 'Я с удовольствием изучаю новую сложную тему, даже если на это уйдёт много времени.'],
+    ['L', 'Мне интересно убеждать людей и договариваться о выгодных условиях.'],
+    ['F', 'Придумать необычное оформление для мероприятия.', 'Составить подробный план и смету этого мероприятия.'],
+    ['L', 'Практическая работа с техникой, инструментами или материалами — скорее не моё.'],
+    ['L', 'Работа, где нужно постоянно поддерживать и обучать других людей, — скорее не моё.'],
+    ['L', 'Мне спокойнее работать, когда есть чёткие правила и понятный порядок действий.'],
+    ['L', 'Долгое и подробное изучение одной проблемы — скорее не моё.'],
+    ['F', 'Изготовить полезную вещь по готовому чертежу.', 'Придумать внешний вид вещи, которую изготовит кто-то другой.'],
+    ['L', 'Я охотно запускаю новые проекты, даже если результат не гарантирован.'],
+    ['L', 'Я замечаю, как сделать вещь, пространство или текст выразительнее.'],
+    ['L', 'Когда кому-то рядом трудно, мне хочется поддержать человека и помочь ему разобраться.'],
+    ['L', 'Мне нравятся задачи, где результат осязаем: исправная вещь, готовая конструкция, выращенное растение.'],
+    ['F', 'Провести исследование и найти ответ на сложный вопрос.', 'Провести занятие, после которого группа разберётся в сложной теме.'],
+    ['L', 'Аккуратно вести документы, учёт и отчётность — скорее не моё.'],
+    ['L', 'Прежде чем сделать вывод, мне важно разобраться в причинах и проверить их на фактах.'],
+    ['L', 'Руководить людьми и принимать решения за группу — скорее не моё.'],
+    ['L', 'Задачи, где нужно придумать своё без готового образца, — скорее не моё.'],
+    ['F', 'Договориться с партнёрами о новом сотрудничестве.', 'Выстроить систему учёта, в которой всё сходится до копейки.']
+  ];
+  var LABELS = ['совсем не про меня', 'скорее не про меня', 'трудно сказать', 'скорее про меня', 'точно про меня'];
+  var LIK = { R: [1, 8, 16, 24], I: [3, 13, 19, 27], A: [6, 12, 22, 29], S: [2, 9, 17, 23], E: [7, 14, 21, 28], C: [4, 11, 18, 26] };
+  var REV = { 16: 1, 17: 1, 19: 1, 26: 1, 28: 1, 29: 1 };
+  var FC = { 5: ['R', 'S'], 10: ['I', 'E'], 15: ['A', 'C'], 20: ['R', 'A'], 25: ['I', 'S'], 30: ['E', 'C'] };
+  var ORDER = ['R', 'I', 'A', 'S', 'E', 'C'];
+  var NAMES = { R: 'Практика и техника', I: 'Анализ и исследования', A: 'Творчество', S: 'Помощь людям', E: 'Руководство и влияние', C: 'Порядок и точность' };
+  var LINES = { R: 'практические задачи с осязаемым результатом', I: 'анализ, поиск причин и работа с фактами', A: 'создание нового и работа с образами', S: 'помощь и объяснение другим людям', E: 'руководство, переговоры и ответственность за результат', C: 'порядок, точность и работа с данными и документами' };
+
+  var CQ = [
+    { id: 'age', title: 'Сколько вам лет?', hint: 'Возраст влияет на то, какие пути обучения доступны', kind: 'input', ph: 'Например, 24', max: 3, req: true },
+    { id: 'education', title: 'Какое у вас образование?', hint: 'Выберите то, что подходит лучше всего', kind: 'chips', opts: ['Школа', 'Учусь в колледже', 'Колледж', 'Учусь в вузе', 'Высшее', 'Два высших и больше'], req: true },
+    { id: 'study_field', title: 'Какая у вас специальность или направление учёбы?', hint: 'Если нет — так и напишите', kind: 'text', ph: 'Например: финансы и кредит, 2 курс, дистанционно', max: 200 },
+    { id: 'work', title: 'Чем вы занимаетесь сейчас?', hint: 'Что в этой работе нравится, а что нет', kind: 'text', ph: 'Пара предложений', max: 300, req: true },
+    { id: 'values', title: 'Что для вас важнее всего в работе?', hint: 'Можно выбрать несколько', kind: 'chips', multi: true, opts: ['Доход', 'Стабильность', 'Гибкий график', 'Удалённая работа', 'Смысл и польза', 'Карьерный рост', 'Спокойный темп', 'Работа с людьми', 'Работа без людей'], req: true },
+    { id: 'study_time', title: 'Сколько времени готовы вложить в обучение?', hint: 'Примерно, без обязательств', kind: 'chips', opts: ['До 3 месяцев', '3–12 месяцев', '1–2 года', 'Готов(а) к новому образованию'], req: true },
+    { id: 'limits', title: 'Что точно не подходит или ограничивает?', hint: 'Город, переезд, офис, здоровье, сферы, в которые не хотите', kind: 'text', ph: 'Если ограничений нет — так и напишите', max: 300 },
+    { id: 'skills', title: 'Как на деле даётся работа с цифрами, текстами и людьми?', hint: 'Что получается легко, а что утомляет', kind: 'text', ph: 'Например: цифры — легко, с людьми — по настроению', max: 300 }
+  ];
+
+  var KEY = 'eri_progress_v1';
+  var st = { screen: 'welcome', qi: 0, ci: 0, a: {}, c: {}, d: 'both' };
+
+  function save() {
+    var data = JSON.stringify({ screen: st.screen === 'sent' ? 'welcome' : st.screen, qi: st.qi, ci: st.ci, a: st.a, c: st.c, d: st.d });
+    try { if (tg && tg.CloudStorage && inTelegram) tg.CloudStorage.setItem(KEY, data); } catch (e) {}
+    try { localStorage.setItem(KEY, data); } catch (e) {}
+  }
+  function clearSaved() {
+    try { if (tg && tg.CloudStorage && inTelegram) tg.CloudStorage.removeItem(KEY); } catch (e) {}
+    try { localStorage.removeItem(KEY); } catch (e) {}
+  }
+  function restore(cb) {
+    function apply(raw) {
+      try { var s = JSON.parse(raw); if (s && s.a) { st = Object.assign(st, s); } } catch (e) {}
+      cb();
+    }
+    var done = false;
+    try {
+      if (tg && tg.CloudStorage && inTelegram) {
+        tg.CloudStorage.getItem(KEY, function (err, val) { if (done) return; done = true; if (!err && val) apply(val); else { var l = null; try { l = localStorage.getItem(KEY); } catch (e) {} if (l) apply(l); else cb(); } });
+        setTimeout(function () { if (!done) { done = true; cb(); } }, 1500);
+        return;
+      }
+    } catch (e) {}
+    var l = null; try { l = localStorage.getItem(KEY); } catch (e) {}
+    if (l) apply(l); else cb();
+  }
+
+  function haptic(kind) { try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {} }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
+
+  function scores() {
+    var out = {};
+    ORDER.forEach(function (s) {
+      var sum = 0;
+      LIK[s].forEach(function (q) { var v = st.a[q]; sum += (typeof v === 'number') ? (REV[q] ? 6 - v : v) : 3; });
+      Object.keys(FC).forEach(function (q) { var v = st.a[q]; if ((v === 'A' && FC[q][0] === s) || (v === 'B' && FC[q][1] === s)) sum += 2; });
+      out[s] = sum;
+    });
+    return out;
+  }
+
+  var app = document.getElementById('app');
+  var mainBtn = document.getElementById('main');
+  var backBtn = document.getElementById('back');
+
+  function answer(v) {
+    st.a[st.qi + 1] = v; haptic(); save(); render();
+    setTimeout(function () {
+      if (st.qi < 29) st.qi++; else st.screen = 'profile';
+      save(); render(); window.scrollTo(0, 0);
+    }, 200);
+  }
+
+  function clarifyValid() {
+    var q = CQ[st.ci], v = st.c[q.id];
+    if (!q.req) return true;
+    if (q.multi) return Array.isArray(v) && v.length > 0;
+    if (q.id === 'age') return /^\d{1,3}$/.test((v || '').trim()) && +v >= 14 && +v <= 90;
+    return !!(v && String(v).trim());
+  }
+
+  function render() {
+    var s = st.screen, h = '';
+    backBtn.classList.toggle('hidden', s === 'welcome' || s === 'sent');
+    mainBtn.disabled = false;
+
+    if (s === 'welcome') {
+      var resume = Object.keys(st.a).length > 0;
+      h = '<div class="stack">' +
+        '<div class="logo"><svg width="58" height="41" viewBox="0 0 170 120" aria-hidden="true"><path d="M21 74 H63 A21 21 0 1 0 57 89" stroke="#1E3A5F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M88 54 V95 M88 72 A18 18 0 0 1 112 56" stroke="#1E3A5F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M134 60 V95" stroke="#1E3A5F" stroke-width="13" stroke-linecap="round" fill="none"/><path d="M134 16 L138.5 27.5 L150 32 L138.5 36.5 L134 48 L129.5 36.5 L118 32 L129.5 27.5 Z" fill="#1F6FB5"/></svg></div>' +
+        '<div class="stack" style="gap:10px"><h1>Какая работа подойдёт именно вам</h1><p class="lead">Тест профессиональных интересов с персональным разбором и подборкой профессий.</p></div>' +
+        '<div class="card">' +
+        '<div class="step"><div class="n">1</div><div><b>30 коротких вопросов</b><span>около 10 минут, правильных ответов нет</span></div></div>' +
+        '<div class="step"><div class="n">2</div><div><b>8 вопросов о вас</b><span>образование, работа, что для вас важно</span></div></div>' +
+        '<div class="step"><div class="n">3</div><div><b>Разбор и план</b><span>текстом в чат и Word-файлами</span></div></div>' +
+        '</div>' +
+        (inTelegram ? '' : '<div class="note warn">Откройте тест через бота в Telegram — иначе отправить ответы не получится.</div>') +
+        '<p class="small">Тест можно пройти один раз. Прогресс сохраняется: если закроете приложение, продолжите с того же места.</p>' +
+        '</div>';
+      mainBtn.textContent = resume ? 'Продолжить тест' : 'Начать тест';
+    }
+
+    else if (s === 'q') {
+      var q = Q[st.qi], cur = st.a[st.qi + 1];
+      h = '<div class="stack"><div class="progress"><div class="row"><span>Вопрос ' + (st.qi + 1) + ' из 30</span></div><div class="bar"><div style="width:' + Math.round((st.qi + 1) / 30 * 100) + '%"></div></div></div>';
+      if (q[0] === 'L') {
+        h += '<div class="q">' + esc(q[1]) + '</div><div class="opts">';
+        for (var i = 1; i <= 5; i++) h += '<button type="button" class="opt' + (cur === i ? ' sel' : '') + '" data-v="' + i + '"><span class="k">' + i + '</span><span>' + LABELS[i - 1] + '</span></button>';
+        h += '</div>';
+      } else {
+        h += '<div class="q" style="min-height:0">Что вам ближе?</div><p class="small" style="margin-top:-12px">Выберите один вариант, даже если нравятся оба</p><div class="opts">' +
+          '<button type="button" class="opt big' + (cur === 'A' ? ' sel' : '') + '" data-v="A"><span class="k">А</span><span>' + esc(q[1]) + '</span></button>' +
+          '<button type="button" class="opt big' + (cur === 'B' ? ' sel' : '') + '" data-v="B"><span class="k">Б</span><span>' + esc(q[2]) + '</span></button></div>';
+      }
+      h += '</div>';
+      mainBtn.textContent = cur !== undefined ? (st.qi < 29 ? 'Дальше' : 'К результату') : 'Выберите ответ';
+      mainBtn.disabled = cur === undefined;
+    }
+
+    else if (s === 'profile') {
+      var sc = scores();
+      var order = ORDER.slice().sort(function (x, y) { return sc[y] - sc[x] || ORDER.indexOf(x) - ORDER.indexOf(y); });
+      h = '<div class="stack"><div class="stack" style="gap:6px"><div class="eyebrow">Тест пройден</div><h2>Ваш профиль: ' + order.slice(0, 3).join(' · ') + '</h2>' +
+        '<p class="lead" style="font-size:15px">Сильнее всего вас привлекают ' + LINES[order[0]] + ', а также ' + LINES[order[1]] + '.</p></div><div class="bars">';
+      order.forEach(function (k) {
+        var v = sc[k], pct = Math.max(3, Math.round((v - 4) / 20 * 100));
+        var col = v >= 18 ? '#1F6FB5' : (v >= 11 ? '#8DB3DA' : '#C3CDD9');
+        h += '<div class="brow"><div class="t"><span>' + NAMES[k] + '</span><b>' + v + '</b></div><div class="track"><div class="fill" style="width:' + pct + '%;background:' + col + '"></div></div></div>';
+      });
+      h += '<div class="small" style="font-size:12px">Шкала от 4 до 24 баллов</div></div>' +
+        '<p class="lead" style="font-size:15px">Чтобы подобрать профессии точнее, ответьте ещё на 8 вопросов о себе — это займёт пару минут.</p></div>';
+      mainBtn.textContent = 'Ответить на вопросы о себе';
+    }
+
+    else if (s === 'clarify') {
+      var cq = CQ[st.ci], cv = st.c[cq.id];
+      h = '<div class="stack"><div class="progress"><div class="row"><span>О вас · ' + (st.ci + 1) + ' из ' + CQ.length + '</span></div><div class="bar"><div style="width:' + Math.round((st.ci + 1) / CQ.length * 100) + '%"></div></div></div>' +
+        '<div class="stack" style="gap:6px"><div class="q" style="min-height:0">' + esc(cq.title) + '</div><p class="small" style="font-size:14px">' + esc(cq.hint) + (cq.req ? '' : ' · необязательно') + '</p></div>';
+      if (cq.kind === 'chips') {
+        h += '<div class="chips">';
+        cq.opts.forEach(function (o) {
+          var sel = cq.multi ? (Array.isArray(cv) && cv.indexOf(o) >= 0) : cv === o;
+          h += '<button type="button" class="chip' + (sel ? ' sel' : '') + '" data-o="' + esc(o) + '">' + esc(o) + '</button>';
+        });
+        h += '</div>';
+      } else if (cq.kind === 'input') {
+        h += '<div><label class="l" for="inp">Ваш ответ</label><input id="inp" type="text" inputmode="numeric" maxlength="' + cq.max + '" placeholder="' + esc(cq.ph) + '" value="' + esc(cv || '') + '"></div>';
+      } else {
+        h += '<div><label class="l" for="inp">Ваш ответ</label><textarea id="inp" maxlength="' + cq.max + '" placeholder="' + esc(cq.ph) + '">' + esc(cv || '') + '</textarea><div class="counter" id="cnt">' + (cv || '').length + ' / ' + cq.max + '</div></div>';
+      }
+      h += '</div>';
+      mainBtn.textContent = st.ci < CQ.length - 1 ? 'Дальше' : 'Готово';
+      mainBtn.disabled = !clarifyValid();
+    }
+
+    else if (s === 'deliver') {
+      var opts = [
+        ['both', 'Текстом в чат и Word-файлами', 'Коротко в чате и подробно в двух документах'],
+        ['files', 'Только Word-файлами', 'Разбор теста и рекомендации — два документа'],
+        ['chat', 'Только текстом в чат', 'Короткая версия прямо в переписке с ботом']
+      ];
+      h = '<div class="stack"><div class="stack" style="gap:6px"><h2>Почти готово</h2><p class="lead" style="font-size:15px">Как прислать разбор? Он придёт в чат с ботом примерно через минуту.</p></div>';
+      opts.forEach(function (o) {
+        h += '<button type="button" class="choice' + (st.d === o[0] ? ' sel' : '') + '" data-d="' + o[0] + '"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F6FB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          (o[0] === 'chat' ? '<path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/>' : '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>') +
+          '</svg></span><span><b>' + o[1] + '</b><span>' + o[2] + '</span></span></button>';
+      });
+      h += '<p class="small">Ответы используются только для подготовки разбора и удаляются после отправки.</p></div>';
+      mainBtn.textContent = 'Получить разбор';
+      mainBtn.disabled = !inTelegram;
+    }
+
+    else if (s === 'sent') {
+      h = '<div class="stack" style="padding-top:40px;text-align:center"><h2>Ответы отправлены</h2><p class="lead">Разбор придёт в чат с ботом примерно через минуту.</p></div>';
+      mainBtn.textContent = 'Закрыть';
+    }
+
+    app.innerHTML = h;
+    bind();
+  }
+
+  function bind() {
+    Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (b) {
+      b.addEventListener('click', function () { var v = b.getAttribute('data-v'); answer(v === 'A' || v === 'B' ? v : parseInt(v, 10)); });
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('.chip'), function (b) {
+      b.addEventListener('click', function () {
+        var q = CQ[st.ci], o = b.getAttribute('data-o');
+        if (q.multi) { var arr = Array.isArray(st.c[q.id]) ? st.c[q.id].slice() : []; var i = arr.indexOf(o); if (i >= 0) arr.splice(i, 1); else arr.push(o); st.c[q.id] = arr; }
+        else st.c[q.id] = o;
+        haptic(); save(); render();
+      });
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('.choice'), function (b) {
+      b.addEventListener('click', function () { st.d = b.getAttribute('data-d'); haptic(); save(); render(); });
+    });
+    var inp = document.getElementById('inp');
+    if (inp) {
+      inp.addEventListener('input', function () {
+        st.c[CQ[st.ci].id] = inp.value; save();
+        var cnt = document.getElementById('cnt'); if (cnt) cnt.textContent = inp.value.length + ' / ' + CQ[st.ci].max;
+        mainBtn.disabled = !clarifyValid();
+      });
+    }
+  }
+
+  function send() {
+    var arr = [];
+    for (var i = 1; i <= 30; i++) arr.push(st.a[i]);
+    var about = {};
+    CQ.forEach(function (q) { var v = st.c[q.id]; if (v !== undefined && v !== '' && !(Array.isArray(v) && !v.length)) about[q.id] = v; });
+    var payload = JSON.stringify({ v: 1, a: arr, c: about, d: st.d });
+    st.screen = 'sent'; clearSaved(); render();
+    try { tg.sendData(payload); } catch (e) { alert('Не удалось отправить ответы. Откройте тест через кнопку в боте.'); }
+  }
+
+  mainBtn.addEventListener('click', function () {
+    var s = st.screen;
+    if (s === 'welcome') {
+      var n = Object.keys(st.a).length;
+      if (n >= 30) st.screen = 'profile';
+      else { st.screen = 'q'; st.qi = Math.min(n, 29); }
+    } else if (s === 'q') { if (st.qi < 29) st.qi++; else st.screen = 'profile'; }
+    else if (s === 'profile') { st.screen = 'clarify'; }
+    else if (s === 'clarify') { if (!clarifyValid()) return; if (st.ci < CQ.length - 1) st.ci++; else st.screen = 'deliver'; }
+    else if (s === 'deliver') { send(); return; }
+    else if (s === 'sent') { try { tg.close(); } catch (e) {} return; }
+    save(); render(); window.scrollTo(0, 0);
+  });
+
+  backBtn.addEventListener('click', function () {
+    var s = st.screen;
+    if (s === 'q') { if (st.qi > 0) st.qi--; else st.screen = 'welcome'; }
+    else if (s === 'profile') { st.screen = 'q'; st.qi = 29; }
+    else if (s === 'clarify') { if (st.ci > 0) st.ci--; else st.screen = 'profile'; }
+    else if (s === 'deliver') { st.screen = 'clarify'; st.ci = CQ.length - 1; }
+    save(); render(); window.scrollTo(0, 0);
+  });
+
+  restore(function () { if (st.screen === 'sent') st.screen = 'welcome'; render(); });
+})();
+</script>
+</body>
+</html>
